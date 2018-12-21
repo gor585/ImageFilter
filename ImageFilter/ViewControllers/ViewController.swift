@@ -28,11 +28,12 @@ class ViewController: UIViewController {
     }
     
     @IBAction func addTextButtonPressed(_ sender: Any) {
+        performSegue(withIdentifier: "toTextAndDrawing", sender: self)
         
     }
     
     @IBAction func addDrawingButtonPressed(_ sender: Any) {
-        
+        performSegue(withIdentifier: "toTextAndDrawing", sender: self)
     }
     
     @IBAction func savePhotoButtonPressed(_ sender: Any) {
@@ -80,13 +81,24 @@ class ViewController: UIViewController {
             filterVC.mainImage = mainImageView.image
             filterVC.delegate = self
         }
-    }
+        if segue.identifier == "toTextAndDrawing" {
+            guard let txtAnddrawVC = segue.destination as? TextAndDrawingViewController else { return }
+            txtAnddrawVC.mainImage = mainImageView.image
+            txtAnddrawVC.delegate = self
+        }
+     }
 }
 
 //MARK: - Filter Image delegate method
 extension ViewController: FilterImage {
-    
     func updateImage(image: UIImage) {
+        mainImageView.image = image
+    }
+}
+
+//MARK: - Drawing on image delegate image
+extension ViewController: PaintedImage {
+    func updateImageWithDrawings(image: UIImage) {
         mainImageView.image = image
     }
 }
