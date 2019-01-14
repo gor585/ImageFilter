@@ -205,7 +205,6 @@ class FiltersViewController: UIViewController {
     }
     
     
-    
     //MARK: - Modes updating
     func updateEditingMode() {
         if selectedMode == 1 {

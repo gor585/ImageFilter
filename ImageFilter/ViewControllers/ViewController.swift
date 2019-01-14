@@ -27,15 +27,6 @@ class ViewController: UIViewController {
         chooseImage()
     }
     
-    @IBAction func addTextButtonPressed(_ sender: Any) {
-        performSegue(withIdentifier: "toTextAndDrawing", sender: self)
-        
-    }
-    
-    @IBAction func addDrawingButtonPressed(_ sender: Any) {
-        performSegue(withIdentifier: "toTextAndDrawing", sender: self)
-    }
-    
     @IBAction func savePhotoButtonPressed(_ sender: Any) {
         guard let imageData = UIImagePNGRepresentation(mainImageView.image!) else { return }
         guard let compressedImage = UIImage(data: imageData) else { return }
@@ -62,6 +53,16 @@ class ViewController: UIViewController {
         performSegue(withIdentifier: "toFilters", sender: self)
     }
     
+    @IBAction func addTextButtonPressed(_ sender: Any) {
+        selectedMode = 5
+        performSegue(withIdentifier: "toTextAndDrawing", sender: self)
+    }
+    
+    @IBAction func addDrawingButtonPressed(_ sender: Any) {
+        selectedMode = 4
+        performSegue(withIdentifier: "toTextAndDrawing", sender: self)
+    }
+    
     @IBAction func cancelButtonPressed(_ sender: Any) {
         let alert = UIAlertController(title: "Undo changes", message: "Do you want to undo all changes?", preferredStyle: .alert)
         let actionOk = UIAlertAction(title: "Ok", style: .default) { (actionOk) in
@@ -74,6 +75,7 @@ class ViewController: UIViewController {
         self.present(alert, animated: true, completion: nil)
     }
     
+    //MARK: - Segues
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "toFilters" {
             guard let filterVC = segue.destination as? FiltersViewController else { return }
@@ -83,6 +85,7 @@ class ViewController: UIViewController {
         }
         if segue.identifier == "toTextAndDrawing" {
             guard let txtAnddrawVC = segue.destination as? TextAndDrawingViewController else { return }
+            txtAnddrawVC.selectedMode = selectedMode
             txtAnddrawVC.mainImage = mainImageView.image
             txtAnddrawVC.delegate = self
         }

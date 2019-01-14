@@ -20,9 +20,6 @@ class DrawingImageView: UIImageView {
         //Insuring that drawing outside the frame and multiple touches are not possible
         self.clipsToBounds = true
         self.isMultipleTouchEnabled = false
-        
-        //lineColor = UIColor.red
-        //lineWidth = 5
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
