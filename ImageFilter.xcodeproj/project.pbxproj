@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2500A12221F065F400875D1D /* ModesExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2500A12121F065F400875D1D /* ModesExt.swift */; };
 		250D5A5821C3CC7B008E8F14 /* DrawImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 250D5A5721C3CC7B008E8F14 /* DrawImage.swift */; };
 		25188FD521C2528C008FAC34 /* TextAndDrawingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25188FD421C2528C008FAC34 /* TextAndDrawingViewController.swift */; };
 		25257E0321B7D7CF00512F49 /* FiltersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25257E0221B7D7CF00512F49 /* FiltersViewController.swift */; };
@@ -23,6 +24,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2500A12121F065F400875D1D /* ModesExt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModesExt.swift; sourceTree = "<group>"; };
 		250D5A5721C3CC7B008E8F14 /* DrawImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawImage.swift; sourceTree = "<group>"; };
 		25188FD421C2528C008FAC34 /* TextAndDrawingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextAndDrawingViewController.swift; sourceTree = "<group>"; };
 		25257E0221B7D7CF00512F49 /* FiltersViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiltersViewController.swift; sourceTree = "<group>"; };
@@ -51,6 +53,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2500A12321F0664900875D1D /* TxtAndDrawingVCExtensions */ = {
+			isa = PBXGroup;
+			children = (
+				2500A12121F065F400875D1D /* ModesExt.swift */,
+			);
+			path = TxtAndDrawingVCExtensions;
+			sourceTree = "<group>";
+		};
 		257266B421BAA95200BE57BF /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
@@ -84,6 +94,7 @@
 				25CA98CD21B65B3A003AAF98 /* ViewController.swift */,
 				25257E0221B7D7CF00512F49 /* FiltersViewController.swift */,
 				25188FD421C2528C008FAC34 /* TextAndDrawingViewController.swift */,
+				2500A12321F0664900875D1D /* TxtAndDrawingVCExtensions */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -198,6 +209,7 @@
 				25257E0321B7D7CF00512F49 /* FiltersViewController.swift in Sources */,
 				25CA98CC21B65B3A003AAF98 /* AppDelegate.swift in Sources */,
 				25F6154121EC81CE00F86B1A /* HideKeyboardOnTap.swift in Sources */,
+				2500A12221F065F400875D1D /* ModesExt.swift in Sources */,
 				250D5A5821C3CC7B008E8F14 /* DrawImage.swift in Sources */,
 				25DDE98521CCDF800073EC23 /* PaintedImage.swift in Sources */,
 				25F94D0D21BAA033006ED83E /* ImageOrientationFix.swift in Sources */,

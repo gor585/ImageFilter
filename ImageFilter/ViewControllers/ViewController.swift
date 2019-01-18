@@ -53,13 +53,13 @@ class ViewController: UIViewController {
         performSegue(withIdentifier: "toFilters", sender: self)
     }
     
-    @IBAction func addTextButtonPressed(_ sender: Any) {
-        selectedMode = 5
+    @IBAction func addDrawingButtonPressed(_ sender: Any) {
+        selectedMode = 4
         performSegue(withIdentifier: "toTextAndDrawing", sender: self)
     }
     
-    @IBAction func addDrawingButtonPressed(_ sender: Any) {
-        selectedMode = 4
+    @IBAction func addTextButtonPressed(_ sender: Any) {
+        selectedMode = 5
         performSegue(withIdentifier: "toTextAndDrawing", sender: self)
     }
     

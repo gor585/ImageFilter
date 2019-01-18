@@ -29,11 +29,28 @@ class TextAndDrawingViewController: UIViewController {
     @IBOutlet weak var addTextButton: UIButton!
     @IBOutlet weak var textViewBottomConstraint: NSLayoutConstraint!
     
+    @IBOutlet weak var textEditingMenu: UIView!
+    @IBOutlet weak var okButton: UIButton!
+    @IBOutlet weak var cancelButton: UIButton!
+    @IBOutlet weak var whiteTextButton: UIButton!
+    @IBOutlet weak var yellowTextButton: UIButton!
+    @IBOutlet weak var redTextButton: UIButton!
+    @IBOutlet weak var blueTextButton: UIButton!
+    @IBOutlet weak var blackTextButton: UIButton!
+    @IBOutlet weak var clearFillButton: UIButton!
+    @IBOutlet weak var yellowFillButton: UIButton!
+    @IBOutlet weak var redFillButton: UIButton!
+    @IBOutlet weak var blueFillButton: UIButton!
+    @IBOutlet weak var blackFillButton: UIButton!
+    
     var delegate: PaintedImage?
     var mainImage: UIImage?
     var originalImage: UIImage?
     
     var selectedMode: Int?
+    
+    var originalTextLabel: UILabel?
+    var editedTextLabel: UILabel?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,20 +62,32 @@ class TextAndDrawingViewController: UIViewController {
         updateEditingMode()
         
         keyboardStatusListener()
+        
+        enterTextView.delegate = self
     }
     
     @IBAction func doneButtonPressed(_ sender: Any) {
         let alert = UIAlertController(title: "Save changes", message: "Do you want to save all the changes?", preferredStyle: .alert)
         let actionOk = UIAlertAction(title: "Ok", style: .default) { (actionOk) in
-            //Get current graphics context
-            UIGraphicsBeginImageContext(self.drawingImageView.bounds.size)
-            guard let currentContext = UIGraphicsGetCurrentContext() else { return }
-            self.drawingImageView.layer.render(in: currentContext)
-            //Convert current context to UIImage
-            guard let paintedImage = UIGraphicsGetImageFromCurrentImageContext() else { return }
-            UIGraphicsEndImageContext()
+            if self.selectedMode == 4 {
+                //Get current graphics context
+                UIGraphicsBeginImageContext(self.drawingImageView.bounds.size)
+                guard let currentDrawingContext = UIGraphicsGetCurrentContext() else { return }
+                self.drawingImageView.layer.render(in: currentDrawingContext)
+                //Convert current context to UIImage
+                guard let paintedImage = UIGraphicsGetImageFromCurrentImageContext() else { return }
+                UIGraphicsEndImageContext()
+                self.delegate?.updateImageWithDrawings(image: paintedImage)
+            }
+            if self.selectedMode == 5 {
+                UIGraphicsBeginImageContext(self.textImageView.bounds.size)
+                guard let currentTextContext = UIGraphicsGetCurrentContext() else { return }
+                self.textImageView.layer.render(in: currentTextContext)
+                guard let imageWithText = UIGraphicsGetImageFromCurrentImageContext() else { return }
+                UIGraphicsEndImageContext()
+                self.delegate?.updateImageWithDrawings(image: imageWithText)
+            }
             
-            self.delegate?.updateImageWithDrawings(image: paintedImage)
             self.navigationController?.popViewController(animated: true)
         }
         let actionCancel = UIAlertAction(title: "Cancel", style: .default) { (actionCancel) in }
@@ -69,10 +98,17 @@ class TextAndDrawingViewController: UIViewController {
     }
     
     @IBAction func undoButtonPressed(_ sender: Any) {
-        drawingImageView.image = originalImage
-        drawingImageView.clearImage()
-        scaleSlider.value = 5.0
-        updateLineWidth()
+        if selectedMode == 4 {
+            drawingImageView.image = originalImage
+            drawingImageView.clearImage()
+            scaleSlider.value = 5.0
+            updateLineWidth()
+        }
+        if selectedMode == 5 {
+            textImageView.image = originalImage
+            //Removing text labels
+            textImageView.subviews.forEach { $0.removeFromSuperview() }
+        }
     }
     
     //MARK: - Add drawing
@@ -85,6 +121,7 @@ class TextAndDrawingViewController: UIViewController {
         scaleImageView.updateConstraints()
     }
     
+    //MARK: - Line color buttons
     @IBAction func sliderMoved(_ sender: UISlider) {
         updateLineWidth()
     }
@@ -109,6 +146,76 @@ class TextAndDrawingViewController: UIViewController {
         drawingImageView.lineColor = UIColor.black
     }
     
+    //MARK: - Text color buttons
+    @IBAction func whiteTextButtonPressed(_ sender: Any) {
+        editedTextLabel?.textColor = UIColor.white
+    }
+    
+    @IBAction func yellowTextButtonPressed(_ sender: Any) {
+        editedTextLabel?.textColor = UIColor.yellow
+    }
+    
+    @IBAction func redTextButtonPressed(_ sender: Any) {
+        editedTextLabel?.textColor = UIColor.red
+    }
+    
+    @IBAction func blueTextButtonPressed(_ sender: Any) {
+        editedTextLabel?.textColor = UIColor.blue
+    }
+    
+    @IBAction func blackTextButtonPressed(_ sender: Any) {
+        editedTextLabel?.textColor = UIColor.black
+    }
+    
+    //MARK: - Fill color buttons
+    
+    @IBAction func clearFillButtonPressed(_ sender: Any) {
+        editedTextLabel?.backgroundColor = UIColor.clear
+    }
+    
+    @IBAction func yellowFillButtonPressed(_ sender: Any) {
+        editedTextLabel?.backgroundColor = UIColor.yellow
+    }
+    
+    @IBAction func redFillButtonPressed(_ sender: Any) {
+        editedTextLabel?.backgroundColor = UIColor.red
+    }
+    
+    @IBAction func blueFillButtonPressed(_ sender: Any) {
+        editedTextLabel?.backgroundColor = UIColor.blue
+    }
+    
+    @IBAction func blackFillButtonPressed(_ sender: Any) {
+        editedTextLabel?.backgroundColor = UIColor.black
+    }
+    
+    //MARK: - End text editing buttons
+    @IBAction func okButtonPressed(_ sender: Any) {
+        textEditingEnded()
+    }
+    
+    //MARK: - Modes updating
+    func updateEditingMode() {
+        if selectedMode == 4 {
+            drawingMode()
+        } else if selectedMode == 5 {
+            textMode()
+        }
+    }
+}
+
+extension TextAndDrawingViewController: UITextFieldDelegate {
+    
+    //Dissmiss keyboard and clear textField on return pressing
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        self.view.endEditing(true)
+        if enterTextView.text != "" {
+            addTextLabel(withText: enterTextView.text ?? "")
+            enterTextView.text = ""
+        }
+        return false
+    }
+    
     //MARK: - Add text
     func keyboardStatusListener() {
         //Keyboard showing listener
@@ -117,15 +224,49 @@ class TextAndDrawingViewController: UIViewController {
         //Keyboard hiding listener
         NotificationCenter.default.addObserver(self, selector: #selector(TextAndDrawingViewController.handleKeyBoardNotification), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
-        //Hide keyboard on tap
-        self.hideKeyboardWhenTappedAround()
+        //OPTIONAL: Hide keyboard on tap
+        //self.hideKeyboardWhenTappedAround()
     }
     
     @IBAction func addTextButtonPressed(_ sender: Any) {
-        
-        
+        if enterTextView.text != "" {
+            guard let text = enterTextView.text else { return }
+            addTextLabel(withText: text)
+            enterTextView.text = ""
+        }
         //Dissmiss keyboard
-        enterTextView.endEditing(true)
+        view.endEditing(true)
+    }
+    
+    func addTextLabel(withText: String) {
+        let label = UILabel(frame: CGRect(x: textImageView.frame.width / 2, y: textImageView.frame.height / 2, width: 0, height: 0))
+        label.text = withText
+        label.textAlignment = .center
+        label.font = UIFont(name: "Avenir Next", size: 16)
+        label.sizeToFit()
+        label.backgroundColor = UIColor.red
+        textImageView.addSubview(label)
+        label.isUserInteractionEnabled = true
+        
+        let dragGesture = UIPanGestureRecognizer(target: self, action: #selector(TextAndDrawingViewController.wasDragged(_:)))
+        label.addGestureRecognizer(dragGesture)
+        
+        let selectGesture = UITapGestureRecognizer(target: self, action: #selector(TextAndDrawingViewController.wasSelected(_:)))
+        label.addGestureRecognizer(selectGesture)
+    }
+    
+    @objc func wasDragged(_ gesture: UIPanGestureRecognizer) {
+        let translation = gesture.translation(in: textImageView)
+        guard let draggableLabel = gesture.view else { return }
+        draggableLabel.center = CGPoint(x: draggableLabel.center.x + translation.x, y: draggableLabel.center.y + translation.y)
+        gesture.setTranslation(CGPoint.zero, in: textImageView)
+    }
+    
+    @objc func wasSelected(_ gesture: UITapGestureRecognizer) {
+        guard let selectedLabel = gesture.view as? UILabel else { return }
+        originalTextLabel = selectedLabel
+        editedTextLabel = selectedLabel
+        textEditingBegin()
     }
     
     @objc func handleKeyBoardNotification(notification: Notification) {
@@ -142,69 +283,5 @@ class TextAndDrawingViewController: UIViewController {
                 self.view.layoutIfNeeded()
             }, completion: { (completed) in })
         }
-    }
-    
-    //MARK: - Modes updating
-    func updateEditingMode() {
-        if selectedMode == 4 {
-            drawingMode()
-        } else if selectedMode == 5 {
-            textMode()
-        }
-    }
-    
-    func drawingMode() {
-        drawingImageView.isHidden = false
-        drawingImageView.lineColor = UIColor.black
-        updateLineWidth()
-        
-        drawingMenuBottomStack.isHidden = false
-        scaleSlider.isHidden = false
-        scaleSlider.isEnabled = true
-        scaleImageView.isHidden = false
-        scaleLabel.isHidden = false
-        yellowButton.isHidden = false
-        yellowButton.isEnabled = true
-        redButton.isHidden = false
-        redButton.isEnabled = true
-        greenButton.isHidden = false
-        greenButton.isEnabled = true
-        blueButton.isHidden = false
-        blueButton.isEnabled = true
-        blackButton.isHidden = false
-        blackButton.isEnabled = true
-        
-        textImageView.isHidden = true
-        composeTextView.isHidden = true
-        enterTextView.isHidden = true
-        enterTextView.isEnabled = false
-        addTextButton.isHidden = true
-        addTextButton.isEnabled = false
-    }
-    
-    func textMode() {
-        textImageView.isHidden = false
-        composeTextView.isHidden = false
-        enterTextView.isHidden = false
-        enterTextView.isEnabled = true
-        addTextButton.isHidden = false
-        addTextButton.isEnabled = true
-        
-        drawingImageView.isHidden = true
-        drawingMenuBottomStack.isHidden = true
-        scaleSlider.isHidden = true
-        scaleSlider.isEnabled = false
-        scaleImageView.isHidden = true
-        scaleLabel.isHidden = true
-        yellowButton.isHidden = true
-        yellowButton.isEnabled = false
-        redButton.isHidden = true
-        redButton.isEnabled = false
-        greenButton.isHidden = true
-        greenButton.isEnabled = false
-        blueButton.isHidden = true
-        blueButton.isEnabled = false
-        blackButton.isHidden = true
-        blackButton.isEnabled = false
     }
 }
