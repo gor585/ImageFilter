@@ -49,6 +49,7 @@ class TextAndDrawingViewController: UIViewController {
     
     var selectedMode: Int?
     
+    var isTextLabelSelected: Bool?
     var originalTextLabel: UILabel?
     var editedTextLabel: UILabel?
     
@@ -64,6 +65,8 @@ class TextAndDrawingViewController: UIViewController {
         keyboardStatusListener()
         
         enterTextView.delegate = self
+        
+        isTextLabelSelected = false
     }
     
     @IBAction func doneButtonPressed(_ sender: Any) {
@@ -192,6 +195,8 @@ class TextAndDrawingViewController: UIViewController {
     //MARK: - End text editing buttons
     @IBAction func okButtonPressed(_ sender: Any) {
         textEditingEnded()
+        isTextLabelSelected = false
+        setSelected(label: originalTextLabel!)
     }
     
     //MARK: - Modes updating
@@ -257,16 +262,42 @@ extension TextAndDrawingViewController: UITextFieldDelegate {
     
     @objc func wasDragged(_ gesture: UIPanGestureRecognizer) {
         let translation = gesture.translation(in: textImageView)
-        guard let draggableLabel = gesture.view else { return }
-        draggableLabel.center = CGPoint(x: draggableLabel.center.x + translation.x, y: draggableLabel.center.y + translation.y)
-        gesture.setTranslation(CGPoint.zero, in: textImageView)
+        guard let draggableLabel = gesture.view as? UILabel else { return }
+        //If label is in deselected mode - user cam change it's position on drag gesture
+        if isTextLabelSelected == false {
+            draggableLabel.center = CGPoint(x: draggableLabel.center.x + translation.x, y: draggableLabel.center.y + translation.y)
+            gesture.setTranslation(CGPoint.zero, in: textImageView)
+        //Else user can change the size of it's frame
+        } else {
+            if gesture.state == .ended {
+                let translation = gesture.translation(in: textImageView)
+                draggableLabel.transform = .identity
+                var newFrame = draggableLabel.frame
+                newFrame.size.width = newFrame.size.width + translation.x
+                newFrame.size.height = newFrame.size.height + translation.y
+                draggableLabel.frame = newFrame
+                draggableLabel.font = UIFont(name: "Avenir Next", size: draggableLabel.frame.size.height)
+            }
+        }
     }
     
     @objc func wasSelected(_ gesture: UITapGestureRecognizer) {
         guard let selectedLabel = gesture.view as? UILabel else { return }
+        isTextLabelSelected = true
+        setSelected(label: selectedLabel)
         originalTextLabel = selectedLabel
         editedTextLabel = selectedLabel
         textEditingBegin()
+    }
+    
+    func setSelected(label: UILabel) {
+        if isTextLabelSelected == true {
+            label.layer.borderColor = UIColor.blue.cgColor
+            label.layer.borderWidth = 1
+        } else {
+            label.layer.borderColor = UIColor.clear.cgColor
+            label.layer.borderWidth = 0
+        }
     }
     
     @objc func handleKeyBoardNotification(notification: Notification) {
