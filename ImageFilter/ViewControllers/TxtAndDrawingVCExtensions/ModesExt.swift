@@ -81,6 +81,8 @@ extension TextAndDrawingViewController {
         blackFillButton.isEnabled = true
         okButton.isEnabled = true
         okButton.layer.cornerRadius = 10
+        rotateButton.isEnabled = true
+        rotateButton.layer.cornerRadius = 10
     }
     
     func textEditingEnded() {
@@ -96,5 +98,6 @@ extension TextAndDrawingViewController {
         blueFillButton.isEnabled = false
         blackFillButton.isEnabled = false
         okButton.isEnabled = false
+        rotateButton.isEnabled = false
     }
 }

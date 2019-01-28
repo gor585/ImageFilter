@@ -31,7 +31,7 @@ class TextAndDrawingViewController: UIViewController {
     
     @IBOutlet weak var textEditingMenu: UIView!
     @IBOutlet weak var okButton: UIButton!
-    @IBOutlet weak var cancelButton: UIButton!
+    @IBOutlet weak var rotateButton: UIButton!
     @IBOutlet weak var whiteTextButton: UIButton!
     @IBOutlet weak var yellowTextButton: UIButton!
     @IBOutlet weak var redTextButton: UIButton!
@@ -50,6 +50,7 @@ class TextAndDrawingViewController: UIViewController {
     var selectedMode: Int?
     
     var isTextLabelSelected: Bool?
+    var isResizable: Bool?
     var originalTextLabel: UILabel?
     var editedTextLabel: UILabel?
     
@@ -67,6 +68,7 @@ class TextAndDrawingViewController: UIViewController {
         enterTextView.delegate = self
         
         isTextLabelSelected = false
+        isResizable = false
     }
     
     @IBAction func doneButtonPressed(_ sender: Any) {
@@ -192,9 +194,16 @@ class TextAndDrawingViewController: UIViewController {
         editedTextLabel?.backgroundColor = UIColor.black
     }
     
+    //MARK: - Rotate text label
+    @IBAction func rotateButtonPressed(_ sender: UIButton) {
+        sender.backgroundColor = UIColor.yellow
+        isResizable = false
+    }
+    
     //MARK: - End text editing buttons
     @IBAction func okButtonPressed(_ sender: Any) {
         textEditingEnded()
+        rotateButton.backgroundColor = UIColor.lightGray
         isTextLabelSelected = false
         setSelected(label: originalTextLabel!)
     }
@@ -258,6 +267,9 @@ extension TextAndDrawingViewController: UITextFieldDelegate {
         
         let selectGesture = UITapGestureRecognizer(target: self, action: #selector(TextAndDrawingViewController.wasSelected(_:)))
         label.addGestureRecognizer(selectGesture)
+        
+        let rotateGesture = UIRotationGestureRecognizer(target: self, action: #selector(TextAndDrawingViewController.wasRotated(_:)))
+        label.addGestureRecognizer(rotateGesture)
     }
     
     @objc func wasDragged(_ gesture: UIPanGestureRecognizer) {
@@ -270,13 +282,15 @@ extension TextAndDrawingViewController: UITextFieldDelegate {
         //Else user can change the size of it's frame
         } else {
             if gesture.state == .ended {
-                let translation = gesture.translation(in: textImageView)
-                draggableLabel.transform = .identity
-                var newFrame = draggableLabel.frame
-                newFrame.size.width = newFrame.size.width + translation.x
-                newFrame.size.height = newFrame.size.height + translation.y
-                draggableLabel.frame = newFrame
-                draggableLabel.font = UIFont(name: "Avenir Next", size: draggableLabel.frame.size.height)
+                if isTextLabelSelected == true && isResizable == true {
+                    let translation = gesture.translation(in: textImageView)
+                    draggableLabel.transform = .identity
+                    var newFrame = draggableLabel.frame
+                    newFrame.size.width = newFrame.size.width + translation.x
+                    newFrame.size.height = newFrame.size.height + translation.y
+                    draggableLabel.frame = newFrame
+                    draggableLabel.font = UIFont(name: "Avenir Next", size: draggableLabel.frame.size.height)
+                }
             }
         }
     }
@@ -284,10 +298,22 @@ extension TextAndDrawingViewController: UITextFieldDelegate {
     @objc func wasSelected(_ gesture: UITapGestureRecognizer) {
         guard let selectedLabel = gesture.view as? UILabel else { return }
         isTextLabelSelected = true
+        isResizable = true
+        rotateButton.backgroundColor = UIColor.lightGray
         setSelected(label: selectedLabel)
         originalTextLabel = selectedLabel
         editedTextLabel = selectedLabel
         textEditingBegin()
+    }
+    
+    @objc func wasRotated(_ gesture: UIRotationGestureRecognizer) {
+        guard let rotatedLabel = gesture.view as? UILabel else { return }
+        if isTextLabelSelected == true && isResizable == false {
+            if gesture.state == .began || gesture.state == .changed {
+                rotatedLabel.transform = rotatedLabel.transform.rotated(by: gesture.rotation)
+                gesture.rotation = 0
+            }
+        }
     }
     
     func setSelected(label: UILabel) {
